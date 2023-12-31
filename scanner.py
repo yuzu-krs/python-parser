@@ -1,6 +1,10 @@
 import os
 import sys
 
+#行番号
+line_number=1
+
+
 internal_tokens = []
 token=None
 
@@ -29,14 +33,19 @@ def get_current_token():
 
 
 def process_file(file_path):
+    global line_number
     with open(file_path, "r", encoding="utf-8") as file:
         current_char = file.read(1)  # 最初の文字を読み込む
 
         while current_char:
             if current_char.isspace():
+                if current_char=='\n':
+                    line_number+=1
                 current_char = file.read(1)  # 空白文字の場合はスキップ
             elif current_char == '#':
                 while current_char and current_char != '\n':
+                    if current_char=='\n':
+                        line_number+=1
                     current_char = file.read(1)
             elif current_char == '"':
                 current_char = file.read(1)  # 次の文字を読み込む
@@ -49,7 +58,7 @@ def process_file(file_path):
                     current_char = file.read(1)  # 次の文字を読み込む
                     add_internal_token(11)
                 else:
-                    print("エラー: 2つ目のダブルクォートが閉じられていません")
+                    print("エラー "+str(line_number)+"行目: 2つ目のダブルクォートが閉じられていません")
                     sys.exit(1)
 
             elif current_char == ':':
@@ -59,7 +68,7 @@ def process_file(file_path):
                     current_char = file.read(1)  # 次の文字を読み込む
                     add_internal_token(22)
                 else:
-                    print("エラー: ':' の後に '=' がありません")
+                    print("エラー "+str(line_number)+"行目: ':' の後に '=' がありません")
                     sys.exit(1)
 
             elif current_char == '+':
@@ -117,7 +126,7 @@ def process_file(file_path):
 
                 if '.' in token_value:
                     if token_value.count('.') >= 2 or (token_value.count('.') == 1 and token_value.endswith('.')):
-                        print("エラー: 小数点が2つ以上か末尾に含まれています")
+                        print("エラー "+str(line_number)+"行目: 小数点が2つ以上か末尾に含まれています") 
                         sys.exit(1)
                     else:
                         add_internal_token(10)  # token_valueに.を含む場合は10
@@ -151,7 +160,7 @@ def process_file(file_path):
                     add_internal_token(1)
 
             else:
-                print("エラー:文法が間違っています")
+                print("エラー "+str(line_number)+"行目:文法が間違っています")
                 sys.exit(1)
 
 
