@@ -499,9 +499,6 @@ def output_sequence():
         else:
             print("エラー:'出力単位'がありません")
             sys.exit(1)
-    else:
-        #出力単位だけでも良い
-        get_next_token()
     
 
 # <出力単位> → <式> | “文字列”
