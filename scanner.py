@@ -231,17 +231,17 @@ def first_function_name():
     return token in valid_numbers
 
 
+# 非終端記号を呼ぶ前に先読み
 
 
-
+# 完成
 # <プログラム> → {<解釈単位>“;”}
 def program():
     # 最初のトークンを取得
     get_next_token()
     if first_program():
-        # First集合に含まれるならば
         while first_interpretation_unit():
-            # <解釈単位>
+            # 解釈単位
             interpretation_unit()
             # ';'
             if get_current_token() == 19 :
@@ -250,90 +250,350 @@ def program():
                 print("エラー:';'がありません")
                 sys.exit(1)
         print("構文は正しいです")       
+    elif get_current_token() is None:
+            print("構文は正しいです")       
     else:
-        print("エラー:'解釈単位'がありません")
+        print("エラー:'<プログラム>'が間違っています")
         sys.exit(1)
 
 
+# 完成
 # <解釈単位> → <変数代入> | <変数宣言> | <変数入力> | <出力指定> | <repeat 文>
 def interpretation_unit():
-    # 変数宣言
-    if first_variable_declaration():
+    if first_variable_assignment():
+        # 変数代入
+        variable_assignment()
+    elif first_variable_declaration():
+        # 変数宣言 
         variable_declaration()
+        
+    elif first_input_statement():
+        # 変数入力
+        input_statement()
+
+    elif first_output_specification():
+        # 出力指定
+        output_specification()
+    
+    elif first_repeat_statement():
+        # repeat文
+        repeat_statement()
     else:
-        print("エラー:'var'がありません")
+        print("エラー:'<解釈単位>'が間違っています．")
         sys.exit(1)
 
-        
-
-    # 変数入力
-
-    # 出力指定
-
-    # repeat文
 
 
-# # <変数代入>
-# def variable_assignment():
+# <変数代入> → <変数名> “:=” <式>
+def variable_assignment():
+    if first_parse_variable_name():
+        # 変数名
+        parse_variable_name()
+        # ':='
+        if get_current_token() == 22:
+            get_next_token()
+            if first_parse_expression():
+                # 式
+                parse_expression()
+            else:
+                print("エラー:'式'が間違っています．")
+                sys.exit(1)
+        else:
+            print("エラー:':='が間違っています．")
+            sys.exit(1)
+    else:
+        print("エラー:'変数'が間違っています．")
+        sys.exit(1)
 
-# <変数名>
+
+# <変数名> → “識別子”
 def parse_variable_name():
-    if token == 1:
+    # '識別子'
+    if get_current_token() == 1:
         get_next_token()
         
 
-# # <式>
-# def parse_expression():
+# <式> → [“+” | “-”] <項> {“+” <項> | “-” <項> }
+def parse_expression():
+    # '+'
+    if get_current_token() == 12:     
+        get_next_token()
+    # '-'
+    elif get_current_token() == 13:
+        get_next_token()
+    if first_term():
+        # 項
+        term()
+        # '+' or '-'
+        while get_current_token()in(12,13):
+            get_next_token()
+            if first_term():
+                # 項
+                term()
+            else:
+                print("エラー:'項'が間違っています．")
+                sys.exit(1)
+    else:
+        print("エラー:'項'が間違っています．")
+        sys.exit(1)
 
-# # <項>
-# def term():
 
-# # <因子>
-# def factor():
+
+
+# <項> → <因子> {“*” <因子> | “/” <因子> | “div” <因子> | “%” <因子>}
+def term():
+    if first_factor():
+        # 因子
+        factor()
+        # '*' or '/' or 'div' or '%'
+        while get_current_token() in (14,15,6,16):
+            get_next_token()
+            if first_factor():
+                # 因子
+                factor()
+            else:
+                print("エラー:'因子'がありません")
+                sys.exit(1)
+    else:
+        print("エラー:'因子'がありません")
+        sys.exit(1)
+
+
+
+#<因子> → “(” <式>“)” | “整数” | “実数” | <変数名> | <関数呼出>
+def factor():
+    # '('
+    if get_current_token()==17:
+        get_next_token()
+        if first_parse_expression():
+            # 式
+            parse_expression()
+            # ')'
+            if get_current_token()==18:
+                get_next_token()
+            else:
+                print("エラー:')'がありません")
+                sys.exit(1)
+        else:
+            print("エラー:'式'が間違っています")
+            sys.exit(1)
+    # '整数'
+    elif get_current_token()==9:
+        get_next_token()
+    # '実数'
+    elif get_current_token()==10:
+        get_next_token()
+    elif first_parse_variable_name():
+        # 変数名
+        parse_variable_name()
+    elif first_function_call():
+        # 関数呼出
+        function_call()
+    else:
+        print("エラー:'因子'が間違っています")
+        sys.exit(1)
+
 
 
 # <変数宣言> → “var” <変数名> [“:=” <式>]
 def variable_declaration():
+    #'var'
     if get_current_token() == 2:
         get_next_token()
         if first_parse_variable_name():
+            # 変数名
             parse_variable_name()
-            # まだ未実装
+            # ':='
+            if get_current_token()==22:
+                get_next_token()
+                if first_parse_expression():
+                    # 式
+                    parse_expression()
+                else:
+                    print("エラー:'式'がありません")
+                    sys.exit(1)
         else:
             print("エラー:'変数名'がありません")
             sys.exit(1)
 
 
+# <変数入力> → “read” “(” <変数名> “)”
+def input_statement():
+    # 'read'
+    if get_current_token()==3:
+        get_next_token()
+        # '('
+        if get_current_token()==17:
+            get_next_token()
+            if first_parse_variable_name():
+                # 変数名
+                parse_variable_name()
+                # ')'
+                if get_current_token()==18:
+                    get_next_token()
+                else:
+                    print("エラー:')'がありません")
+                    sys.exit(1)
+            else:
+                print("エラー:'変数名'がありません")
+                sys.exit(1)
+        else:
+            print("エラー:'('がありません")
+            sys.exit(1)
+    else:
+        print("エラー:'read'がありません")
+        sys.exit(1)
 
-# # <変数入力>
-# def input_statement():
+# <出力指定> → “print” “(”<出力単位の並び> “)” | “println” “(”<出力単位の並び> “)”
+def output_specification():
+    # 'print'
+    if get_current_token()==4:
+        get_next_token()
+        # '('
+        if get_current_token() == 17:
+            get_next_token()
+            # 出力単位の並び
+            output_sequence()
+            # ')'
+            if get_current_token() == 18:
+                get_next_token()
+            else:
+                print("エラー:')'がありません")
+                sys.exit(1)
+        else:
+            print("エラー:'('がありません")
+            sys.exit(1)
+    # 'println'
+    elif get_current_token()==5:
+        get_next_token()
+        # '('
+        if get_current_token() == 17:
+            get_next_token()
+            # 出力単位の並び
+            output_sequence()
+            # ')'
+            if get_current_token() == 18:
+                get_next_token()
+            else:
+                print("エラー:')'がありません")
+                sys.exit(1)
+        else:
+            print("エラー:'('がありません")
+            sys.exit(1)
+    else:
+        print("エラー:'出力単位'がありません")
+        sys.exit(1)
 
-# # <出力指定>
-# def output_specification():
 
-# # <出力単位の並び>
-# def output_sequence():
+# <出力単位の並び> → ε | <出力単位> {“,” <出力単位>}
+def output_sequence():
+    if first_output_unit():
+        # 出力単位
+        output_unit()
+        # ','
+    while get_current_token()==20:
+        get_next_token()
+        if first_output_unit():
+            # 出力単位
+            output_unit()
+        else:
+            print("エラー:'出力単位'がありません")
+            sys.exit(1)
+    else:
+        #出力単位だけでも良い
+        get_next_token()
+    
 
-# # <出力単位>
-# def output_unit():
-
-# # <repeat文>
-# def repeat_statement():
-
-# # <関数呼出>
-# def function_call():
-
-# # <関数名>
-# def function_name():
-
-# # <式の並び>
-# def expression_sequence():
+# <出力単位> → <式> | “文字列”
+def output_unit():
+    if first_parse_expression():
+        # 式        
+        parse_expression()
+        #'文字列'
+    elif get_current_token() == 11:
+        get_next_token()
+    else:
+        print("エラー:'出力単位'がありません")
+        sys.exit(1)
 
 
 
+# <repeat 文> → “repeat” <式> <変数代入>
+def repeat_statement():
+    # 'repeat'
+    if get_current_token()==7:
+        get_next_token()
+        if first_parse_expression():
+            # 式
+            parse_expression()
+            if first_variable_assignment():
+                # 変数代入
+                variable_assignment()
+            else:
+                print("エラー:'変数代入'がありません")
+                sys.exit(1)
+        else:
+            print("エラー:'式'がありません")
+            sys.exit(1)
+    else:
+        print("エラー:'repeat'がありません")
+        sys.exit(1)
+        
+
+#<関数呼出> → “@” <関数名> “(” <式の並び> “)”
+def function_call():
+    # '@'
+    if get_current_token() == 21:
+        get_next_token()
+        if first_function_name():
+            # 関数名
+            function_name()
+            # '('
+            if get_current_token()==17:
+                get_next_token()
+                # 式の並び
+                expression_sequence()
+                # ')'
+                if get_current_token()==18:
+                    get_next_token()
+                else:
+                    print("エラー:')'がありません")
+                    sys.exit(1)
+            else:
+                print("エラー:'('がありません")
+                sys.exit(1)
+        else:
+            print("エラー:'関数名'がありません")
+            sys.exit(1)
+    else:
+        print("エラー:'@'がありません")
+        sys.exit(1)
 
 
 
+#<関数名> → “識別子”
+def function_name():
+    # '識別子'
+    if get_current_token() == 1:
+        get_next_token()
+
+
+# <式の並び> → ε | <式> {“,” <式>}
+def expression_sequence():
+    if first_parse_expression():
+        # 式
+        parse_expression()
+        # ','
+        while get_current_token()==20:
+            get_next_token()
+            if first_parse_expression():
+                # 式
+                parse_expression()
+            else:
+                print("エラー:','の後に'式'がありません")
+                sys.exit(1)
+        #式だけでも良い
+    
 
 if __name__ == "__main__":
     # if len(sys.argv) != 2:
