@@ -263,11 +263,17 @@ def first_function_name():
 
 # 非終端記号を呼ぶ前に先読み
 
+# エラー回復が1回でも起こった場合は構文が正しいを表示しない
+error_recovery_flag=False
+
 # エラーリカバリ関数
 def error_recovery(expected_tokens):
+    global error_recovery_flag
+    error_recovery_flag=True
     # 予測されるトークンセットに含まれている限りトークンを進める
     while get_current_token() not in expected_tokens and get_current_token() is not None:
         get_next_token()
+    get_next_token()
 
 
 
@@ -287,8 +293,10 @@ def program():
             else:
                 print("line:"+str(line_number)+" SyntaxError:';'がありません")
                 error_recovery([19])
-                
-        print("構文は正しいです")       
+        
+        # エラー回復が1回でも起こった場合は表示しない
+        if not error_recovery_flag:
+            print("構文は正しいです")       
     elif get_current_token() is None:
             print("構文は正しいです")       
     else:
