@@ -263,8 +263,16 @@ def first_function_name():
 
 # 非終端記号を呼ぶ前に先読み
 
+# エラーリカバリ関数
+def error_recovery(expected_tokens):
+    # 予測されるトークンセットに含まれている限りトークンを進める
+    while get_current_token() not in expected_tokens and get_current_token() is not None:
+        get_next_token()
 
-# 完成
+
+
+
+
 # <プログラム> → {<解釈単位>“;”}
 def program():
     # 最初のトークンを取得
@@ -278,7 +286,8 @@ def program():
                 get_next_token()
             else:
                 print("line:"+str(line_number)+" SyntaxError:';'がありません")
-                sys.exit(1)
+                error_recovery([19])
+                
         print("構文は正しいです")       
     elif get_current_token() is None:
             print("構文は正しいです")       
@@ -287,7 +296,7 @@ def program():
         sys.exit(1)
 
 
-# 完成
+
 # <解釈単位> → <変数代入> | <変数宣言> | <変数入力> | <出力指定> | <repeat 文>
 def interpretation_unit():
     if first_variable_assignment():
@@ -310,7 +319,8 @@ def interpretation_unit():
         repeat_statement()
     else:
         print("line:"+str(line_number)+" SyntaxError:'<解釈単位>'が間違っています")
-        sys.exit(1)
+        error_recovery([19])
+        
 
 
 
@@ -327,13 +337,14 @@ def variable_assignment():
                 parse_expression()
             else:
                 print("line:"+str(line_number)+" SyntaxError:'=:'の後に'<式>'がありません")
-                sys.exit(1)
+                error_recovery([19])
+                
         else:
             print("line:"+str(line_number)+" SyntaxError:':='がありません")
-            sys.exit(1)
+            error_recovery([19])
     else:
         print("line:"+str(line_number)+" SyntaxError:'<変数名>'が間違っています")
-        sys.exit(1)
+        error_recovery([19])
 
 
 # <変数名> → “識別子”
@@ -362,10 +373,10 @@ def parse_expression():
                 term()
             else:
                 print("line:"+str(line_number)+" SyntaxError:'+'の後に'<項>'がありません")                                                
-                sys.exit(1)
+                error_recovery([19])
     else:
         print("line:"+str(line_number)+" SyntaxError:'<項>'が間違っています")                                                        
-        sys.exit(1)
+        error_recovery([19])
 
 
 
@@ -383,10 +394,10 @@ def term():
                 factor()
             else:
                 print("line:"+str(line_number)+" SyntaxError:'演算子'の後に'<因子>'がありません")                                                        
-                sys.exit(1)
+                error_recovery([19])
     else:
         print("line:"+str(line_number)+" SyntaxError:'<因子>'が間違っています")                                                                
-        sys.exit(1)
+        error_recovery([19])
 
 
 
@@ -403,10 +414,10 @@ def factor():
                 get_next_token()
             else:
                 print("line:"+str(line_number)+" SyntaxError:')'がありません")     
-                sys.exit(1)
+                error_recovery([19])
         else:
             print("line:"+str(line_number)+" SyntaxError:'('の後に'<式>'がありません")     
-            sys.exit(1)
+            error_recovery([19])
     # '整数'
     elif get_current_token()==9:
         get_next_token()
@@ -421,7 +432,7 @@ def factor():
         function_call()
     else:
         print("line:"+str(line_number)+" SyntaxError:'因子'が間違っています")     
-        sys.exit(1)
+        error_recovery([19])
 
 
 
@@ -441,13 +452,13 @@ def variable_declaration():
                     parse_expression()
                 else:
                     print("line:"+str(line_number)+" SyntaxError:':='の後に'式'がありません") 
-                    sys.exit(1)
+                    error_recovery([19])
         else:
             print("line:"+str(line_number)+" SyntaxError:'変数名'がありません") 
-            sys.exit(1)
+            error_recovery([19])
     else:
         print("line:"+str(line_number)+" SyntaxError:'var'がありません") 
-        sys.exit(1)
+        error_recovery([19])
 
 # <変数入力> → “read” “(” <変数名> “)”
 def input_statement():
@@ -465,16 +476,20 @@ def input_statement():
                     get_next_token()
                 else:
                     print("line:"+str(line_number)+" SyntaxError:')'がありません") 
-                    sys.exit(1)
+                    error_recovery([19])
+                    
             else:
                 print("line:"+str(line_number)+" SyntaxError:'変数名'がありません")                 
-                sys.exit(1)
+                error_recovery([19])
+                
         else:
             print("line:"+str(line_number)+" SyntaxError:'('がありません") 
-            sys.exit(1)
+            error_recovery([19])
+            
     else:
         print("line:"+str(line_number)+" SyntaxError:'read'がありません") 
-        sys.exit(1)
+        error_recovery([19])
+        
 
 # <出力指定> → “print” “(”<出力単位の並び> “)” | “println” “(”<出力単位の並び> “)”
 def output_specification():
@@ -491,10 +506,10 @@ def output_specification():
                 get_next_token()
             else:
                 print("line:"+str(line_number)+" SyntaxError:')'がありません") 
-                sys.exit(1)
+                error_recovery([19])
         else:
             print("line:"+str(line_number)+" SyntaxError:'('がありません") 
-            sys.exit(1)
+            error_recovery([19])
     # 'println'
     elif get_current_token()==5:
         get_next_token()
@@ -508,13 +523,13 @@ def output_specification():
                 get_next_token()
             else:
                 print("line:"+str(line_number)+" SyntaxError:')'がありません") 
-                sys.exit(1)
+                error_recovery([19])
         else:
             print("line:"+str(line_number)+" SyntaxError:')'がありません")             
-            sys.exit(1)
+            error_recovery([19])
     else:
         print("line:"+str(line_number)+" SyntaxError:'出力指定'が間違っています") 
-        sys.exit(1)
+        error_recovery([19])
 
 
 # <出力単位の並び> → ε | <出力単位> {“,” <出力単位>}
@@ -530,7 +545,7 @@ def output_sequence():
             output_unit()
         else:
             print("line:"+str(line_number)+" SyntaxError:'出力単位'が間違っています") 
-            sys.exit(1)
+            error_recovery([19])
     
 
 # <出力単位> → <式> | “文字列”
@@ -543,7 +558,7 @@ def output_unit():
         get_next_token()
     else:
         print("line:"+str(line_number)+" SyntaxError:'出力単位'が間違っています") 
-        sys.exit(1)
+        error_recovery([19])
 
 
 
@@ -560,13 +575,13 @@ def repeat_statement():
                 variable_assignment()
             else:
                 print("line:"+str(line_number)+" SyntaxError:'変数代入'が間違っています") 
-                sys.exit(1)
+                error_recovery([19])
         else:            
             print("line:"+str(line_number)+" SyntaxError:'式'が間違っています")             
-            sys.exit(1)
+            error_recovery([19])
     else:
         print("line:"+str(line_number)+" SyntaxError:'repeat'がありません") 
-        sys.exit(1)
+        error_recovery([19])
         
 
 #<関数呼出> → “@” <関数名> “(” <式の並び> “)”
@@ -587,16 +602,16 @@ def function_call():
                     get_next_token()
                 else:
                     print("line:"+str(line_number)+" SyntaxError:')'がありません") 
-                    sys.exit(1)
+                    error_recovery([19])
             else:
                 print("line:"+str(line_number)+" SyntaxError:'('がありません") 
-                sys.exit(1)
+                error_recovery([19])
         else:
             print("line:"+str(line_number)+" SyntaxError:'関数名'が間違っています") 
-            sys.exit(1)
+            error_recovery([19])
     else:
         print("line:"+str(line_number)+" SyntaxError:'@'がありません") 
-        sys.exit(1)
+        error_recovery([19])
 
 
 
@@ -620,7 +635,7 @@ def expression_sequence():
                 parse_expression()
             else:
                 print("line:"+str(line_number)+" SyntaxError:','の後に'式'がありません") 
-                sys.exit(1)
+                error_recovery([19])
         #式だけでも良い
     
 
