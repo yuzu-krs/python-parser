@@ -4,18 +4,31 @@ import sys
 #行番号
 line_number=1
 
+#行番号を格納する配列
 line_number_list=[-1]
+
+#意味解析のための識別子と整数を確保する配列
+semantic_analysis_list=[]
+#意味解析用
+token_value=None
+
+# インタプリンタのための配列
+interpreter_list=[]
 
 
 internal_tokens = []
 token=None
 
+
 def add_internal_token(token):
     global line_number
     global line_number_list
+    global token_value
     internal_tokens.append(token)
     # line_numberを記憶
     line_number_list.append(line_number)
+    #意味解析に使用
+    interpreter_list.append(token_value)
 
 
 # 先読み関数
@@ -54,11 +67,13 @@ def get_current_token():
 
 
 def process_file(file_path):
-    global line_number
+    global line_number 
+    global token_value
     with open(file_path, "r", encoding="utf-8") as file:
         current_char = file.read(1)  # 最初の文字を読み込む
 
         while current_char:
+            token_value=None #意味解析用
             if current_char.isspace():
                 if current_char=='\n':
                     line_number+=1
@@ -71,15 +86,20 @@ def process_file(file_path):
             elif current_char == '"':
                 current_char = file.read(1)  # 次の文字を読み込む
 
+                # ダブルクォートで囲まれた文字列を保存する変数
+                string_value = ""
+
                 # 次のダブルクォートが見つかるまでスキップ
                 while current_char and current_char != '"':
+                    string_value += current_char
                     current_char = file.read(1)
 
                 if current_char == '"':
                     current_char = file.read(1)  # 次の文字を読み込む
                     add_internal_token(11)
+
                 else:
-                    print("エラー "+str(line_number)+"行目: 2つ目のダブルクォートが閉じられていません")
+                    print("エラー " + str(line_number) + "行目: 2つ目のダブルクォートが閉じられていません")
                     sys.exit(1)
 
             elif current_char == ':':
@@ -150,8 +170,10 @@ def process_file(file_path):
                         print("エラー "+str(line_number)+"行目: 小数点が2つ以上か末尾に含まれています") 
                         sys.exit(1)
                     else:
+                        print(token_value)
                         add_internal_token(10)  # token_valueに.を含む場合は10
                 else:
+                    print(token_value)
                     add_internal_token(9)  # token_valueに.を含まない場合は9
 
             elif current_char.isalpha() or current_char == '_':
@@ -163,6 +185,7 @@ def process_file(file_path):
                         token_value += current_char
                     else:
                         break
+                
 
                 # 上記で保持した文字列が特定のキーワードの場合は対応する値を追加
                 if token_value == 'var':
@@ -178,6 +201,7 @@ def process_file(file_path):
                 elif token_value == 'repeat':
                     add_internal_token(7)
                 else:
+                    print(token_value)
                     add_internal_token(1)
 
             else:
@@ -660,6 +684,8 @@ if __name__ == "__main__":
 
     # file_path = sys.argv[1]
     process_file(file_path)
+
+    print(interpreter_list)
 
     #構文解析
     program()
