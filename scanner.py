@@ -364,6 +364,8 @@ def update_variable_in_symbol_table(name, new_value):
 
 
 
+
+
 # <プログラム> → {<解釈単位>“;”}
 def program():
     # 最初のトークンを取得
@@ -700,13 +702,19 @@ def function_call():
     if get_current_token() == 21:
         get_next_token()
         if first_function_name():
+
             # 関数名
-            function_name()
+            tmp=function_name()
+            #関数名をチェック
+            check_function_name(tmp)
+            
             # '('
             if get_current_token()==17:
                 get_next_token()
-                # 式の並び
-                expression_sequence()
+                # 式の並び argsに引数の個数を格納する(意味解析で使用)
+                function_length=expression_sequence()
+                # 関数の引数をチェック
+                check_args(tmp,function_length)
                 # ')'
                 if get_current_token()==18:
                     get_next_token()
@@ -724,29 +732,78 @@ def function_call():
         error_recovery([19])
 
 
+# 意味解析での関数名の引数チェック
+# 関数名と関数の引数
+def check_args(function_string,function_length):
+    if function_string=="sqrt" and function_length==1:
+        pass
+    elif function_string=="max" and function_length==2:
+        pass
+    elif function_string=="min" and function_length==2:
+        pass
+    elif function_string=="sin" and function_length==1:
+        pass
+    elif function_string=="cos" and function_length==1:
+        pass
+    elif function_string=="tan" and function_length==1:
+        pass
+    else:
+        print("line:"+str(line_number)+" FunctionError:different arguments") 
+        sys.exit(1)
+
+# 意味解析での関数名の引数チェック
+# 関数名と関数の引数
+def check_function_name(function_string):
+    if function_string=="sqrt" :
+        pass
+    elif function_string=="max":
+        pass
+    elif function_string=="min":
+        pass
+    elif function_string=="sin":
+        pass
+    elif function_string=="cos":
+        pass
+    elif function_string=="tan":
+        pass
+    else:
+        print("line:"+str(line_number)+" FunctionError:function not found") 
+        sys.exit(1)
+
+    
+
+
 
 #<関数名> → “識別子”
 def function_name():
     # '識別子'
     if get_current_token() == 1:
+        tmp_function_name=token_value
         get_next_token()
+        return tmp_function_name
+        
 
 
 # <式の並び> → ε | <式> {“,” <式>}
 def expression_sequence():
+    # 引数の個数を返す
+    arguments_count=0
     if first_parse_expression():
         # 式
+        arguments_count+=1
         parse_expression()
         # ','
         while get_current_token()==20:
             get_next_token()
             if first_parse_expression():
                 # 式
+                arguments_count+=1
                 parse_expression()
             else:
                 print("line:"+str(line_number)+" SyntaxError:','の後に'式'がありません") 
                 error_recovery([19])
         #式だけでも良い
+        return arguments_count
     
 
 if __name__ == "__main__":
