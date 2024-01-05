@@ -49,6 +49,15 @@ def get_line_number(lst):
     del lst[0]
     return next_element
 
+# 意味解析用リスト
+def get_interpreter(lst):
+    if not lst:
+        return None
+    
+    next_element=lst[0]
+    del lst[0]
+    return next_element
+
 
 # グローバル変数に格納する関数
 def get_next_token():
@@ -56,6 +65,9 @@ def get_next_token():
     token = get_token(internal_tokens)
     global line_number
     line_number=get_line_number(line_number_list)
+    global token_value
+    token_value=get_interpreter(interpreter_list)
+
 
 
 
@@ -73,7 +85,7 @@ def process_file(file_path):
         current_char = file.read(1)  # 最初の文字を読み込む
 
         while current_char:
-            token_value=None #意味解析用
+            token_value="" #意味解析用
             if current_char.isspace():
                 if current_char=='\n':
                     line_number+=1
@@ -170,10 +182,10 @@ def process_file(file_path):
                         print("エラー "+str(line_number)+"行目: 小数点が2つ以上か末尾に含まれています") 
                         sys.exit(1)
                     else:
-                        print(token_value)
+
                         add_internal_token(10)  # token_valueに.を含む場合は10
                 else:
-                    print(token_value)
+                    
                     add_internal_token(9)  # token_valueに.を含まない場合は9
 
             elif current_char.isalpha() or current_char == '_':
@@ -189,19 +201,24 @@ def process_file(file_path):
 
                 # 上記で保持した文字列が特定のキーワードの場合は対応する値を追加
                 if token_value == 'var':
+                    token_value=""
                     add_internal_token(2)
                 elif token_value == 'read':
+                    token_value=""
                     add_internal_token(3)
                 elif token_value == 'print':
+                    token_value=""
                     add_internal_token(4)
                 elif token_value == 'println':
+                    token_value=""
                     add_internal_token(5)
                 elif token_value == 'div':
+                    token_value=""
                     add_internal_token(6)
                 elif token_value == 'repeat':
+                    token_value=""
                     add_internal_token(7)
                 else:
-                    print(token_value)
                     add_internal_token(1)
 
             else:
@@ -300,6 +317,50 @@ def error_recovery(expected_tokens):
     get_next_token()
 
 
+#####
+
+#記号表
+
+symbol_table = {}
+
+# 登録
+def add_variable_to_symbol_table(name, value):
+    symbol_table[name] = value
+
+# 探索
+def find_variable_in_symbol_table(name):
+    return symbol_table.get(name)
+
+# 値の変更
+def update_variable_in_symbol_table(name, new_value):
+    if name in symbol_table:
+        symbol_table[name] = new_value
+        return True
+    else:
+        return False
+
+# # 例として変数 x を登録
+# add_variable_to_symbol_table('x', 10)
+
+# シンボルテーブルの内容を表示
+# print("初期のシンボルテーブル:", symbol_table)
+
+# # 変数 y の値を探索
+# found_value = find_variable_in_symbol_table('y')
+# print("変数 y の値:", found_value)
+
+# # 変数 x の値を更新
+# success = update_variable_in_symbol_table('x', 30)
+# if success:
+#     print("変数 x の値を更新しました:", symbol_table)
+# else:
+#     print("変数 x が見つかりませんでした")
+
+# # 存在しない変数 z の値を探索
+# not_found_value = find_variable_in_symbol_table('z')
+# print("変数 z の値:", not_found_value)
+
+#####
 
 
 
@@ -474,6 +535,14 @@ def variable_declaration():
     if get_current_token() == 2:
         get_next_token()
         if first_parse_variable_name():
+            # "識別子が記号表に登録済みか"
+            if token_value in symbol_table:
+                #登録済みである
+                print("line:"+str(line_number)+" エラー:変数が二重に定義されています") 
+                
+            else:
+                # 識別子がまだ登録されていない
+                symbol_table[token_value]=None 
             # 変数名
             parse_variable_name()
             # ':='

@@ -19,5 +19,6 @@ print("ちなみに，");
 print("sqrt(", C, ") の値は");
 println(@sqrt(C), "です");
 println(); #空行の挿入
+var f;
 
 println("誤差は ", f-@sqrt(C), "です");
