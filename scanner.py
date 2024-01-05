@@ -450,7 +450,7 @@ def parse_variable_name():
         # "識別子が記号表に登録済みでない"
         # "未定義の変数の参照によるエラー"
         if token_value not in symbol_table:
-            print("line:"+str(line_number_list[1])+" NameError:name '"+token_value+ "' is not defined") 
+            print("line:"+str(line_number_list[1])+" NameError:'"+token_value+ "' は未定義の変数です") 
             sys.exit(1)
 
         get_next_token()
@@ -549,7 +549,7 @@ def variable_declaration():
             # "識別子が記号表に登録済みか"
             if token_value in symbol_table:
                 #登録済みである 変数が二重に定義されています
-                print("line:"+str(line_number)+" DuplicateError: '"+token_value+"' is duplicated") 
+                print("line:"+str(line_number)+" DuplicateError: '"+token_value+"' は二重に定義されています") 
                 sys.exit(1)
             else:
                 # 識別子がまだ登録されていない
@@ -705,8 +705,6 @@ def function_call():
 
             # 関数名
             tmp=function_name()
-            #関数名をチェック
-            check_function_name(tmp)
             
             # '('
             if get_current_token()==17:
@@ -735,42 +733,45 @@ def function_call():
 # 意味解析での関数名の引数チェック
 # 関数名と関数の引数
 def check_args(function_string,function_length):
-    if function_string=="sqrt" and function_length==1:
-        pass
-    elif function_string=="max" and function_length==2:
-        pass
-    elif function_string=="min" and function_length==2:
-        pass
-    elif function_string=="sin" and function_length==1:
-        pass
-    elif function_string=="cos" and function_length==1:
-        pass
-    elif function_string=="tan" and function_length==1:
-        pass
-    else:
-        print("line:"+str(line_number)+" FunctionError:different arguments") 
-        sys.exit(1)
-
-# 意味解析での関数名の引数チェック
-# 関数名と関数の引数
-def check_function_name(function_string):
     if function_string=="sqrt" :
-        pass
-    elif function_string=="max":
-        pass
-    elif function_string=="min":
-        pass
-    elif function_string=="sin":
-        pass
-    elif function_string=="cos":
-        pass
-    elif function_string=="tan":
-        pass
+        if function_length==1:
+            pass
+        else:
+            print("line:"+str(line_number)+" FunctionError:関数[sqrt]の引数の個数 '"+str(function_length)+"' が不適です") 
+            sys.exit(1)
+    elif function_string=="max" :
+        if function_length==2:
+            pass
+        else:
+            print("line:"+str(line_number)+" FunctionError:関数[max]の引数の個数 '"+str(function_length)+"' が不適です") 
+            sys.exit(1)
+    elif function_string=="min" :
+        if function_length==2:
+            pass
+        else:
+            print("line:"+str(line_number)+" FunctionError:関数[min]の引数の個数 '"+str(function_length)+"' が不適です") 
+            sys.exit(1)
+    elif function_string=="sin" :
+        if function_length==1:
+            pass
+        else:
+            print("line:"+str(line_number)+" FunctionError:関数[sin]の引数の個数 '"+str(function_length)+"' が不適です") 
+            sys.exit(1)
+    elif function_string=="cos" :
+        if function_length==1:
+            pass
+        else:
+            print("line:"+str(line_number)+" FunctionError:関数[cos]の引数の個数 '"+str(function_length)+"' が不適です") 
+            sys.exit(1)
+    elif function_string=="tan" :
+        if function_length==1:
+            pass
+        else:
+            print("line:"+str(line_number)+" FunctionError:関数[tan]の引数の個数 '"+str(function_length)+"' が不適です") 
+            sys.exit(1)
     else:
-        print("line:"+str(line_number)+" FunctionError:function not found") 
+        print("line:"+str(line_number)+" FunctionError: "+str(function_string)+" そのような関数はありません") 
         sys.exit(1)
-
-    
 
 
 

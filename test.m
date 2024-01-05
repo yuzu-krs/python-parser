@@ -1,3 +1,4 @@
 var C := 12;
-println(@sqrt(C), "です");
+var T := 12;
+println(@max(C,T), "です");
 
