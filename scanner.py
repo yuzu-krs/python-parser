@@ -443,8 +443,17 @@ def variable_assignment():
 # <変数名> → “識別子”
 def parse_variable_name():
     # '識別子'
-    if get_current_token() == 1:
+    if get_current_token() == 1: 
+        
+        # "識別子が記号表に登録済みでない"
+        # "未定義の変数の参照によるエラー"
+        if token_value not in symbol_table:
+            print("line:"+str(line_number_list[1])+" NameError:name '"+token_value+ "' is not defined") 
+            sys.exit(1)
+
         get_next_token()
+
+
         
 
 # <式> → [“+” | “-”] <項> {“+” <項> | “-” <項> }
@@ -537,9 +546,9 @@ def variable_declaration():
         if first_parse_variable_name():
             # "識別子が記号表に登録済みか"
             if token_value in symbol_table:
-                #登録済みである
-                print("line:"+str(line_number)+" エラー:変数が二重に定義されています") 
-                
+                #登録済みである 変数が二重に定義されています
+                print("line:"+str(line_number)+" DuplicateError: '"+token_value+"' is duplicated") 
+                sys.exit(1)
             else:
                 # 識別子がまだ登録されていない
                 symbol_table[token_value]=None 
