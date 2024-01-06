@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 
 #行番号
 line_number=1
@@ -363,6 +364,30 @@ def update_variable_in_symbol_table(name, new_value):
 #####
 
 
+# インタプリンタ計算を行う関数
+# 平方根を求める関数
+def sqrt(x):
+    return math.sqrt(x)
+
+# 二つの数のうち大きい方を求める関数
+def max(a, b):
+    return builtins.max(a, b)
+
+# 二つの数のうち小さい方を求める関数
+def min(a, b):
+    return builtins.min(a, b)
+
+# 正弦を求める関数
+def sin(x):
+    return math.sin(x)
+
+# 余弦を求める関数
+def cos(x):
+    return math.cos(x)
+
+# 正接を求める関数
+def tan(x):
+    return math.tan(x)
 
 
 
@@ -820,8 +845,6 @@ if __name__ == "__main__":
 
     # file_path = sys.argv[1]
     process_file(file_path)
-
-    print(interpreter_list)
 
     #構文解析
     program()
