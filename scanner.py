@@ -400,9 +400,6 @@ def tan(x):
     return math.tan(x)
 
 
-result1=None
-result2=None
-
 
 
 
@@ -504,8 +501,6 @@ def parse_variable_name():
 
 # <式> → [“+” | “-”] <項> {“+” <項> | “-” <項> }
 def parse_expression():
-    global result1
-    global result2
     # '+'
     if get_current_token() == 12:     
         get_next_token()
@@ -970,5 +965,7 @@ if __name__ == "__main__":
 
     #構文解析
     program()
+
+    print(symbol_table)
 
         
