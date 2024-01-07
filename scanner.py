@@ -348,6 +348,10 @@ def update_variable_in_symbol_table(name, new_value):
     else:
         return False
 
+#keyに対して値を返す
+def get_value_from_symbol_table(key):
+    return symbol_table.get(key)
+
 # # 例として変数 x を登録
 # add_variable_to_symbol_table('x', 10)
 
@@ -398,6 +402,11 @@ def tan(x):
     return math.tan(x)
 
 
+result1=None
+result2=None
+
+
+
 
 # <プログラム> → {<解釈単位>“;”}
 def program():
@@ -417,10 +426,10 @@ def program():
         # エラー回復が1回でも起こった場合は表示しない
         if not error_recovery_flag:
             print("---------------------------")
-            print("構文は正しいです")       
+            print("意味的&構文的は正しいです")       
     elif get_current_token() is None:
         print("---------------------------")
-        print("構文は正しいです")       
+        print("構文的&意味的は正しいです")       
     else:
         print("line:"+str(line_number)+" SyntaxError:'<プログラム>'が間違っています")
         sys.exit(1)
@@ -457,6 +466,7 @@ def interpretation_unit():
 # <変数代入> → <変数名> “:=” <式>
 def variable_assignment():
     if first_parse_variable_name():
+        tmp_token=token_value
         # 変数名
         parse_variable_name()
         # ':='
@@ -464,7 +474,9 @@ def variable_assignment():
             get_next_token()
             if first_parse_expression():
                 # 式
-                parse_expression()
+                tmp_number=parse_expression()
+                print(tmp_number)
+                update_variable_in_symbol_table(tmp_token,tmp_number)
             else:
                 print("line:"+str(line_number)+" SyntaxError:'=:'の後に'<式>'がありません")
                 error_recovery([19])
@@ -495,6 +507,8 @@ def parse_variable_name():
 
 # <式> → [“+” | “-”] <項> {“+” <項> | “-” <項> }
 def parse_expression():
+    global result1
+    global result2
     # '+'
     if get_current_token() == 12:     
         get_next_token()
@@ -503,20 +517,35 @@ def parse_expression():
         get_next_token()
     if first_term():
         # 項
-        term()
+        result1=term() 
         # '+' or '-'
         while get_current_token()in(12,13):
+            operator_type=0
+            if get_current_token()==12:
+                operator_type=1
+            
+            elif get_current_token()==13:
+                operator_type=2
+
+            
+
             get_next_token()
             if first_term():
                 # 項
-                term()
+                result2=term()
             else:
                 print("line:"+str(line_number)+" SyntaxError:'+'の後に'<項>'がありません")                                                
                 error_recovery([19])
+            
+            if operator_type==1:
+                result1 = float(result1) + float(result2)
+            elif operator_type==2:
+                result1 = float(result1) - float(result2)
+        
+        return result1
     else:
         print("line:"+str(line_number)+" SyntaxError:'<項>'が間違っています")                                                        
         error_recovery([19])
-
 
 
 
@@ -524,19 +553,51 @@ def parse_expression():
 def term():
     if first_factor():
         # 因子
-        factor()
+        result1=factor() #因子の構文解析結果を保持
         # '*' or '/' or 'div' or '%'
         while get_current_token() in (14,15,6,16):
+            operator_type=0
+            # '*'
+            if get_current_token()==14:
+                operator_type=1
+            # '/'
+            elif get_current_token()==15:
+                operator_type=2
+            # 'div'
+            elif get_current_token()==6:
+                operator_type=3
+            # '%'
+            elif get_current_token()==16:
+                operator_type=4
+            
             get_next_token()
             if first_factor():
                 # 因子
-                factor()
+                result2=factor()
             else:
                 print("line:"+str(line_number)+" SyntaxError:'演算子'の後に'<因子>'がありません")                                                        
                 error_recovery([19])
+            
+            #演算を行う
+            #'*'
+            if operator_type==1:
+                result1=result1*result2
+            #'/'
+            elif operator_type==2:
+                result1=result1/result2
+            #整数除算 'div'
+            elif operator_type==3:
+                result1=result1//result2
+            #'%'
+            elif operator_type==4:
+                result1=result1%result2
+            
+        return result1
     else:
         print("line:"+str(line_number)+" SyntaxError:'<因子>'が間違っています")                                                                
         error_recovery([19])
+
+
 
 
 
@@ -547,10 +608,11 @@ def factor():
         get_next_token()
         if first_parse_expression():
             # 式
-            parse_expression()
+            result1=parse_expression()
             # ')'
             if get_current_token()==18:
                 get_next_token()
+                return result1
             else:
                 print("line:"+str(line_number)+" SyntaxError:')'がありません")     
                 error_recovery([19])
@@ -559,20 +621,27 @@ def factor():
             error_recovery([19])
     # '整数'
     elif get_current_token()==9:
+        result1=token_value
         get_next_token()
+        return result1
     # '実数'
     elif get_current_token()==10:
+        result1=token_value
         get_next_token()
+        return result1
     elif first_parse_variable_name():
         # 変数名
+        result1=token_value
         parse_variable_name()
+        #keyに対して値を更新(記号表)
+        return get_value_from_symbol_table(result1)
     elif first_function_call():
         # 関数呼出
-        function_call()
+        result1=function_call()
+        return result1
     else:
         print("line:"+str(line_number)+" SyntaxError:'因子'が間違っています")     
         error_recovery([19])
-
 
 
 # <変数宣言> → “var” <変数名> [“:=” <式>]
@@ -590,13 +659,17 @@ def variable_declaration():
                 # 識別子がまだ登録されていない
                 symbol_table[token_value]=None 
             # 変数名
+            tmp_token=token_value
             parse_variable_name()
             # ':='
             if get_current_token()==22:
                 get_next_token()
                 if first_parse_expression():
                     # 式
-                    parse_expression()
+                    tmp_number=parse_expression()
+                    print(tmp_number)
+                    update_variable_in_symbol_table(tmp_token,tmp_number)
+                    
                 else:
                     print("line:"+str(line_number)+" SyntaxError:':='の後に'式'がありません") 
                     error_recovery([19])
@@ -706,7 +779,7 @@ def output_unit():
     global tmp_line_number
     if first_parse_expression():
         # 式        
-        parse_expression()
+        print(parse_expression())
         #'文字列'
     elif get_current_token() == 11:
         # 文字列を表示する際に，同じ行のprintは同じ行に表示するため
@@ -732,7 +805,7 @@ def repeat_statement():
         get_next_token()
         if first_parse_expression():
             # 式
-            parse_expression()
+            print(parse_expression())
             if first_variable_assignment():
                 # 変数代入
                 variable_assignment()
@@ -746,6 +819,7 @@ def repeat_statement():
         print("line:"+str(line_number)+" SyntaxError:'repeat'がありません") 
         error_recovery([19])
         
+
 
 #<関数呼出> → “@” <関数名> “(” <式の並び> “)”
 def function_call():
@@ -761,12 +835,13 @@ def function_call():
             if get_current_token()==17:
                 get_next_token()
                 # 式の並び argsに引数の個数を格納する(意味解析で使用)
-                function_length=expression_sequence()
+                function_length,function_number1,function_number2=expression_sequence()
                 # 関数の引数をチェック
-                check_args(tmp,function_length)
+                result=check_args(tmp,function_length,function_number1,function_number2)
                 # ')'
                 if get_current_token()==18:
                     get_next_token()
+                    return result
                 else:
                     print("line:"+str(line_number)+" SyntaxError:')'がありません") 
                     error_recovery([19])
@@ -783,46 +858,47 @@ def function_call():
 
 # 意味解析での関数名の引数チェック
 # 関数名と関数の引数
-def check_args(function_string,function_length):
+def check_args(function_string,function_length,function_number1,function_number2):
     if function_string=="sqrt" :
         if function_length==1:
-            pass
+            sqrt(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[sqrt]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="max" :
         if function_length==2:
-            pass
+            max(function_number1,function_number2)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[max]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="min" :
         if function_length==2:
-            pass
+            min(function_number1,function_number2)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[min]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="sin" :
         if function_length==1:
-            pass
+            sin(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[sin]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="cos" :
         if function_length==1:
-            pass
+            cos(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[cos]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="tan" :
         if function_length==1:
-            pass
+            tan(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[tan]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     else:
         print("line:"+str(line_number)+" FunctionError: "+str(function_string)+" そのような関数はありません") 
         sys.exit(1)
+
 
 
 
@@ -838,25 +914,32 @@ def function_name():
 
 # <式の並び> → ε | <式> {“,” <式>}
 def expression_sequence():
+    # 今回は引数
+    #関数の第一引数
+    function_number1=None
+    #関数の第二引数
+    function_number2=None
+    
     # 引数の個数を返す
     arguments_count=0
     if first_parse_expression():
         # 式
         arguments_count+=1
-        parse_expression()
+        function_number1=parse_expression()
+        print(function_number1)
         # ','
         while get_current_token()==20:
             get_next_token()
             if first_parse_expression():
                 # 式
                 arguments_count+=1
-                parse_expression()
+                function_number2=parse_expression()
+                print(function_number2)
             else:
                 print("line:"+str(line_number)+" SyntaxError:','の後に'式'がありません") 
                 error_recovery([19])
         #式だけでも良い
-        return arguments_count
-    
+        return arguments_count,function_number1,function_number2
 
 if __name__ == "__main__":
     print("---------------------------")
@@ -877,4 +960,5 @@ if __name__ == "__main__":
     #構文解析
     program()
 
+    print(symbol_table)
     
