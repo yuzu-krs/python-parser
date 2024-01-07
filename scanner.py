@@ -690,10 +690,14 @@ def input_statement():
             get_next_token()
             if first_parse_variable_name():
                 # 変数名
+                tmp_token=token_value 
                 parse_variable_name()
                 # ')'
                 if get_current_token()==18:
+                    tmp_input=input()
+                    update_variable_in_symbol_table(tmp_token,tmp_input)
                     get_next_token()
+                    
                 else:
                     print("line:"+str(line_number)+" SyntaxError:')'がありません") 
                     error_recovery([19])
@@ -784,7 +788,11 @@ def output_unit():
     elif get_current_token() == 11:
         # 文字列を表示する際に，同じ行のprintは同じ行に表示するため
         # 現在の行と次の行が同じだった場合は改行なし，もしくは配列の最後ではない場合改行あり
-        if len(interpreter_line_number)==1:
+
+        # 次のトークンがreadだったら改行しない
+        if internal_tokens[2]==3:
+            print(token_value+" ",end='')
+        elif len(interpreter_line_number)==1:
             print(token_value) #改行する
         elif interpreter_line_number[0]==interpreter_line_number[1]:
             print(token_value+" ",end='') #改行なし
