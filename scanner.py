@@ -381,13 +381,11 @@ def get_value_from_symbol_table(key):
 def sqrt(x):
     return math.sqrt(x)
 
-# 二つの数のうち大きい方を求める関数
-def max(a, b):
-    return builtins.max(a, b)
+# 二つの数のうち大きい方を求める関数(標準である)
 
-# 二つの数のうち小さい方を求める関数
-def min(a, b):
-    return builtins.min(a, b)
+
+# 二つの数のうち小さい方を求める関数(標準である)
+
 
 # 正弦を求める関数
 def sin(x):
@@ -475,7 +473,6 @@ def variable_assignment():
             if first_parse_expression():
                 # 式
                 tmp_number=parse_expression()
-                print(tmp_number)
                 update_variable_in_symbol_table(tmp_token,tmp_number)
             else:
                 print("line:"+str(line_number)+" SyntaxError:'=:'の後に'<式>'がありません")
@@ -623,12 +620,12 @@ def factor():
     elif get_current_token()==9:
         result1=token_value
         get_next_token()
-        return result1
+        return float(result1)
     # '実数'
     elif get_current_token()==10:
         result1=token_value
         get_next_token()
-        return result1
+        return float(result1)
     elif first_parse_variable_name():
         # 変数名
         result1=token_value
@@ -667,7 +664,6 @@ def variable_declaration():
                 if first_parse_expression():
                     # 式
                     tmp_number=parse_expression()
-                    print(tmp_number)
                     update_variable_in_symbol_table(tmp_token,tmp_number)
                     
                 else:
@@ -790,10 +786,11 @@ def output_unit():
         # 現在の行と次の行が同じだった場合は改行なし，もしくは配列の最後ではない場合改行あり
 
         # 次のトークンがreadだったら改行しない
-        if internal_tokens[2]==3:
-            print(token_value+" ",end='')
-        elif len(interpreter_line_number)==1:
+        if len(interpreter_line_number)==1:
             print(token_value) #改行する
+        elif  len(internal_tokens)>2 and internal_tokens[2]==3 :
+            print(token_value+" ",end='')
+
         elif interpreter_line_number[0]==interpreter_line_number[1]:
             print(token_value+" ",end='') #改行なし
         else:
@@ -869,37 +866,45 @@ def function_call():
 def check_args(function_string,function_length,function_number1,function_number2):
     if function_string=="sqrt" :
         if function_length==1:
-            sqrt(function_number1)
+            function_number1=float(function_number1)
+            return sqrt(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[sqrt]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="max" :
         if function_length==2:
-            max(function_number1,function_number2)
+            function_number1=float(function_number1)                
+            function_number2=float(function_number2)
+            return max(function_number1,function_number2)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[max]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="min" :
         if function_length==2:
-            min(function_number1,function_number2)
+            function_number1=float(function_number1)                
+            function_number2=float(function_number2)
+            return min(function_number1,function_number2)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[min]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="sin" :
         if function_length==1:
-            sin(function_number1)
+            function_number1=float(function_number1)
+            return sin(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[sin]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="cos" :
         if function_length==1:
-            cos(function_number1)
+            function_number1=float(function_number1)
+            return cos(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[cos]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
     elif function_string=="tan" :
         if function_length==1:
-            tan(function_number1)
+            function_number1=float(function_number1)
+            return tan(function_number1)
         else:
             print("line:"+str(line_number)+" FunctionError:関数[tan]の引数の個数 '"+str(function_length)+"' が不適です") 
             sys.exit(1)
@@ -934,7 +939,6 @@ def expression_sequence():
         # 式
         arguments_count+=1
         function_number1=parse_expression()
-        print(function_number1)
         # ','
         while get_current_token()==20:
             get_next_token()
@@ -942,7 +946,6 @@ def expression_sequence():
                 # 式
                 arguments_count+=1
                 function_number2=parse_expression()
-                print(function_number2)
             else:
                 print("line:"+str(line_number)+" SyntaxError:','の後に'式'がありません") 
                 error_recovery([19])
@@ -968,5 +971,4 @@ if __name__ == "__main__":
     #構文解析
     program()
 
-    print(symbol_table)
-    
+        
