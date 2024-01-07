@@ -581,16 +581,16 @@ def term():
             #演算を行う
             #'*'
             if operator_type==1:
-                result1=result1*result2
+                result1 = float(result1) * float(result2)         
             #'/'
             elif operator_type==2:
-                result1=result1/result2
+                result1 = float(result1) / float(result2)
             #整数除算 'div'
             elif operator_type==3:
-                result1=result1//result2
+                result1 = float(result1) // float(result2)
             #'%'
             elif operator_type==4:
-                result1=result1%result2
+                result1 = float(result1) % float(result2)
             
         return result1
     else:
