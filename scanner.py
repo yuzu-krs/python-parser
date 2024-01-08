@@ -737,8 +737,7 @@ def output_specification():
             if get_current_token() == 18:
                 get_next_token()
                 # printlnの場合改行
-                if not len(interpreter_line_number)==0:
-                    print()
+                print()
             else:
                 print("line:"+str(line_number)+" SyntaxError:')'がありません") 
                 error_recovery([19])
@@ -774,22 +773,14 @@ def output_unit():
     global tmp_line_number
     if first_parse_expression():
         # 式        
-        print(parse_expression())
+        print(str(parse_expression()), end='')
         #'文字列'
     elif get_current_token() == 11:
         # 文字列を表示する際に，同じ行のprintは同じ行に表示するため
         # 現在の行と次の行が同じだった場合は改行なし，もしくは配列の最後ではない場合改行あり
-
-        # 次のトークンがreadだったら改行しない
-        if len(interpreter_line_number)==1:
-            print(token_value) #改行する
-        elif  len(internal_tokens)>2 and internal_tokens[2]==3 :
-            print(token_value+" ",end='')
-
-        elif interpreter_line_number[0]==interpreter_line_number[1]:
-            print(token_value+" ",end='') #改行なし
-        else:
-            print(token_value) #改行する
+        
+        print(token_value,end='')
+        
         get_line_number(interpreter_line_number)
         get_next_token()
     else:
@@ -966,6 +957,6 @@ if __name__ == "__main__":
     #構文解析
     program()
 
-    print(symbol_table)
+ 
 
         
