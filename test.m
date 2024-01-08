@@ -10,7 +10,7 @@ read(C);
 # 漸化式を初項から計算していく．
 # 20 回程度繰り返せば十分収束するでしょう．
 var f := C; # 計算結果を格納する変数
-f:=(f+C/f)/2.0;
+repeat 20 f:=(f+C/f)/2.0;
 
 print(C, "の平方根は "); print(f); println("です");
 println(); #空行の挿入
@@ -21,3 +21,5 @@ println(@sqrt(C), "です");
 println(); #空行の挿入
 
 println("誤差は ", f-@sqrt(C), "です");
+
+

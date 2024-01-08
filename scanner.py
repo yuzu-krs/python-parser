@@ -420,10 +420,10 @@ def program():
         
         # エラー回復が1回でも起こった場合は表示しない
         if not error_recovery_flag:
-            print("---------------------------")
+            print("\n---------------------------")
             print("意味的&構文的は正しいです")       
     elif get_current_token() is None:
-        print("---------------------------")
+        print("\n---------------------------")
         print("構文的&意味的は正しいです")       
     else:
         print("line:"+str(line_number)+" SyntaxError:'<プログラム>'が間違っています")
@@ -796,8 +796,40 @@ def repeat_statement():
     if get_current_token()==7:
         get_next_token()
         if first_parse_expression():
+            # internal_tokensの;になるまでtmp_tokensに格納する
+            tmp_tokens=[] #初期化
+            # 記号表の更新のためにさらに配列を保持
+            tmp_interpreter_list=[] # 初期化
+            global interpreter_list
+
+            # parse_expression()を通すと0番目のトークンを消費してコピーできなくなるためここでコピーしておく
+            tmp_interpreter_list.append(interpreter_list[0])
+
             # 式
-            print(parse_expression())
+            repeat_count=int(parse_expression())  #リピート回数
+
+            # internal_tokensの;になるまでtmp_tokensに格納する
+            #';'
+            while not get_current_token()==19:
+                tmp_tokens.append(get_current_token())
+                tmp_interpreter_list.append(interpreter_list[0])
+                get_next_token()
+            
+            if get_current_token()==19:
+                tmp_tokens.append(get_current_token())
+
+            # リピートの回数に応じてトークンを増加させる
+            for _ in range(repeat_count):
+                global internal_tokens  # globalキーワードを追加
+                internal_tokens = tmp_tokens + internal_tokens
+                interpreter_list=tmp_interpreter_list+interpreter_list
+            
+            # 上で消費したトークンがコピーによってひとつ前の読み込み前となっているためここで消費する
+            # global token_value
+            # token_value=get_interpreter(interpreter_list)
+
+            get_next_token()
+
             if first_variable_assignment():
                 # 変数代入
                 variable_assignment()
@@ -957,7 +989,4 @@ if __name__ == "__main__":
 
     #構文解析
     program()
-
- 
-
         
