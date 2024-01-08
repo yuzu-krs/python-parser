@@ -773,7 +773,8 @@ def output_unit():
     global tmp_line_number
     if first_parse_expression():
         # 式        
-        print(str(parse_expression()), end='')
+        #小数点以下6桁
+        print(f"{float(parse_expression()):.6f}", end='')
         #'文字列'
     elif get_current_token() == 11:
         # 文字列を表示する際に，同じ行のprintは同じ行に表示するため
