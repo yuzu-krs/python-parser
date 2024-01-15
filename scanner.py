@@ -816,8 +816,6 @@ def repeat_statement():
             # parse_expression()を通すと0番目のトークンを消費してコピーできなくなるためここでコピーしておく
             tmp_interpreter_list.append(interpreter_list[0])
 
-
-
             # 式
             repeat_count=parse_expression()  #リピート回数
 
@@ -989,21 +987,21 @@ def expression_sequence():
         return arguments_count,function_number1,function_number2
 
 if __name__ == "__main__":
-    print("---------------------------\n")
-    # if len(sys.argv) != 2:
-    #     print("使用法: python scanner.py <ファイル名>")
-    #     sys.exit(1)
+    
+    if len(sys.argv) != 2:
+        print("使用法: python scanner.py <ファイル名>")
+        sys.exit(1)
 
     # 現在のスクリプトのディレクトリを取得
-    current_directory = os.path.dirname(os.path.realpath(__file__))
+    # current_directory = os.path.dirname(os.path.realpath(__file__))
 
     # ファイルのパスを作成
-    file_path = os.path.join(current_directory, "test.m")
+    # file_path = os.path.join(current_directory, "test.m")
 
-    # file_path = sys.argv[1]
+    file_path = sys.argv[1]
     process_file(file_path)
 
+    print("---------------------------\n")
 
-    #構文解析
     program()
         
